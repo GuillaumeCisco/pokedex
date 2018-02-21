@@ -5,7 +5,7 @@ import {createAction} from 'redux-actions';
 import createRequestActionTypes from './createRequestActionTypes';
 
 export const actionTypes = prefix => ({
-    SET: `${prefix}ITEM_SET`,
+    SET: `${prefix}_ITEM_SET`,
     create: createRequestActionTypes(`${prefix}_ITEM_CREATE`),
     get: createRequestActionTypes(`${prefix}_ITEM_GET`),
     update: createRequestActionTypes(`${prefix}_ITEM_UPDATE`),

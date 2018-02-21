@@ -29,6 +29,7 @@ const HOC = (Component = Table) => {
                 onPage,
             } = this.props;
 
+
             return (<div>
                 {loading && <LoaderBig />}
                 {!loading && count !== 0 && [
