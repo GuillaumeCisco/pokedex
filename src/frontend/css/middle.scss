@@ -1,0 +1,12 @@
+.middle {
+    position: absolute;bottom: 0;top: 56px;left: 0;right: 0;
+    .models { height: 100%; }
+    .layout {
+         height: 100%;background-color: #fff;
+        .list,
+        .item { display: inline-block;vertical-align: top;background-color: #fff;overflow-y: auto; }
+
+        .list { width: 45%; }
+        .item { width: 55%; }
+    }
+}
