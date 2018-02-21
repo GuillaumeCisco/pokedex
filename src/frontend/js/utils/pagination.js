@@ -4,26 +4,18 @@
 import queryString from 'query-string';
 import url from 'url';
 import {isEmpty} from 'lodash';
-
-export const initialPages = [{number: 1, current: true}]; // memoize, same object
+import {pages as initialPages} from '../reducers/pagination';
 
 function add_first_page(pages, previous, original_page, nb_pages, page_size) {
-    let previous_page = previous;
-    let base_url = '';
-    let q = {};
-    // url
-    if (typeof previous === 'string') {
-        const parsed_url = url.parse(previous);
-
-        q = queryString.parse(parsed_url.query);
-        base_url = `${parsed_url.protocol}//${parsed_url.host}${parsed_url.pathname}`;
-        previous_page = q.page ? (+q.page || 1) : ((+q.offset + page_size) / page_size);
-    }
-
-    const parameters = {
-        ...q,
-        page: previous_page,
-    };
+    const parsed_url = url.parse(previous),
+        q = queryString.parse(parsed_url.query),
+        base_url = `${parsed_url.protocol}//${parsed_url.host}${parsed_url.pathname}`,
+        // FIXME specific to pokemon api with offset pagination, you can just use +q.page || 1 and delete everything related to offset
+        previous_page = q.offset ? ((+q.offset + page_size) / page_size) : (+q.page || 1),
+        parameters = {
+            ...q,
+            page: previous_page,
+        };
 
     if (original_page === nb_pages) {
         parameters.page = original_page - 2;
@@ -33,7 +25,7 @@ function add_first_page(pages, previous, original_page, nb_pages, page_size) {
             delete parameters.offset;
             pages.unshift({
                 number: 1,
-                url: typeof previous === 'string' ? (base_url + (!isEmpty(parameters) ? `?${queryString.stringify(parameters)}` : '')) : 1,
+                url: base_url + (!isEmpty(parameters) ? `?${queryString.stringify(parameters)}` : ''),
             });
         }
         // specific last pages
@@ -43,7 +35,7 @@ function add_first_page(pages, previous, original_page, nb_pages, page_size) {
                 number: parameters.page,
                 url: original_page === 2 ?
                     previous :
-                    (typeof previous === 'string' ? base_url + (!isEmpty(parameters) ? `?${queryString.stringify(parameters)}` : '') : parameters.page),
+                    (base_url + (!isEmpty(parameters) ? `?${queryString.stringify(parameters)}` : '')),
             });
         }
     }
@@ -57,7 +49,7 @@ function add_first_page(pages, previous, original_page, nb_pages, page_size) {
                 parameters.offset = (parameters.page - 1) * page_size;
                 pages.unshift({
                     number: 2,
-                    url: typeof previous === 'string' ? (base_url + (!isEmpty(parameters) ? `?${queryString.stringify(parameters)}` : '')) : parameters.page,
+                    url: base_url + (!isEmpty(parameters) ? `?${queryString.stringify(parameters)}` : ''),
                 });
             }
         }
@@ -71,7 +63,7 @@ function add_first_page(pages, previous, original_page, nb_pages, page_size) {
         delete parameters.offset;
         pages.unshift({
             number: 1,
-            url: typeof previous === 'string' ? (base_url + (!isEmpty(parameters) ? `?${queryString.stringify(parameters)}` : '')) : 1,
+            url: base_url + (!isEmpty(parameters) ? `?${queryString.stringify(parameters)}` : ''),
         });
     }
 
@@ -79,23 +71,15 @@ function add_first_page(pages, previous, original_page, nb_pages, page_size) {
 }
 
 function add_last_page(pages, next, original_page, nb_pages, page_size) {
-
-    let next_page = next;
-    let base_url = '';
-    let q = {};
-    // url
-    if (typeof next === 'string') {
-        const parsed_url = url.parse(next);
-
-        q = queryString.parse(parsed_url.query);
-        base_url = `${parsed_url.protocol}//${parsed_url.host}${parsed_url.pathname}`;
-        next_page = q.page ? (+q.page || 1) : ((+q.offset + page_size) / page_size);
-    }
-
-    const parameters = {
-        ...q,
-        page: next_page,
-    };
+    const parsed_url = url.parse(next),
+        q = queryString.parse(parsed_url.query),
+        base_url = `${parsed_url.protocol}//${parsed_url.host}${parsed_url.pathname}`,
+        // FIXME specific to pokemon api with offset pagination, you can just use +q.page || 1 and delete everything related to offset
+        next_page = q.offset ? ((+q.offset + page_size) / page_size) : (+q.page || 1),
+        parameters = {
+            ...q,
+            page: next_page,
+        };
 
     if (original_page === 1) {
         parameters.page = original_page + 2;
@@ -106,7 +90,7 @@ function add_last_page(pages, next, original_page, nb_pages, page_size) {
             parameters.offset = (parameters.page - 1) * page_size;
             pages.push({
                 number: nb_pages,
-                url: typeof next === 'string' ? (base_url + (!isEmpty(parameters) ? `?${queryString.stringify(parameters)}` : '')) : nb_pages,
+                url: base_url + (!isEmpty(parameters) ? `?${queryString.stringify(parameters)}` : ''),
             });
         }
         // specific first page
@@ -114,7 +98,7 @@ function add_last_page(pages, next, original_page, nb_pages, page_size) {
             parameters.offset = (parameters.page - 1) * page_size;
             pages.push({
                 number: parameters.page,
-                url: typeof next === 'string' ? (base_url + (!isEmpty(parameters) ? `?${queryString.stringify(parameters)}` : '')) : parameters.page,
+                url: base_url + (!isEmpty(parameters) ? `?${queryString.stringify(parameters)}` : ''),
             });
         }
     }
@@ -128,7 +112,7 @@ function add_last_page(pages, next, original_page, nb_pages, page_size) {
                 parameters.offset = (parameters.page - 1) * page_size;
                 pages.push({
                     number: nb_pages - 1,
-                    url: typeof next === 'string' ? (base_url + (!isEmpty(parameters) ? `?${queryString.stringify(parameters)}` : '')) : parameters.page,
+                    url: base_url + (!isEmpty(parameters) ? `?${queryString.stringify(parameters)}` : ''),
                 });
             }
         }
@@ -142,7 +126,7 @@ function add_last_page(pages, next, original_page, nb_pages, page_size) {
         parameters.offset = (parameters.page - 1) * page_size;
         pages.push({
             number: nb_pages,
-            url: typeof next === 'string' ? (base_url + (!isEmpty(parameters) ? `?${queryString.stringify(parameters)}` : '')) : nb_pages,
+            url: base_url + (!isEmpty(parameters) ? `?${queryString.stringify(parameters)}` : ''),
         });
     }
 
@@ -151,7 +135,14 @@ function add_last_page(pages, next, original_page, nb_pages, page_size) {
 
 export default function build_pages(page_size, page, {count, next, previous}) {
     const nb_pages = Math.ceil(count / page_size);
-    let pages = page === 1 ? [...initialPages] : [{...initialPages[0], number: page}];
+
+    let pages;
+    if (page === 1) {
+        pages = [...initialPages]; // need to clne it for changing reference for reducer
+    }
+    else {
+        pages = [{...initialPages[0], number: page}];
+    }
 
     if (next) {
         pages.push({number: page + 1, url: next});
@@ -168,6 +159,5 @@ export default function build_pages(page_size, page, {count, next, previous}) {
             pages = add_first_page(pages, previous, page, nb_pages, page_size);
         }
     }
-
     return pages;
 }
